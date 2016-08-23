@@ -5,7 +5,7 @@ Provides advanced CMI import and export functionality for CMI workflows.
 Say you're working on a local development environment for a project where the client is adding and editing configuration.
 For example, the project might be using [contact-forms](https://drupal.org/project/contact_storage) or [Yaml forms](https://drupal.org/project/yaml_form) for user interaction. Each of these and their associated fields, form and view displays are a config object. As the client is editing these, you don't want that configuration tracked in your source control.
 
-So you start working on a new feature, the first thing you do is sync down a QA or production database and then you run your config import so that you're local environment is in a clean state. 
+So you start working on a new feature, the first thing you do is sync down a QA or production database and then you run your config import so that your local environment is in a clean state. 
 
 You work on some features and the time has come to export those changes to your config export folder, in order to check in the new work into git ready for deployment.
 
@@ -96,7 +96,7 @@ So we move the google_analytics.settings.yml out of our `config-export` folder a
 
 ## Partial imports
 
-So as alluded above, `drush cimy` is similar to `drush cim --partial` in that it does partial exports. 
+So as alluded above, `drush cimy` is similar to `drush cim --partial` in that it does partial imports. 
 
 The way `drush cim --partial` works is equivalent to the following
 
