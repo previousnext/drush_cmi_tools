@@ -53,7 +53,7 @@ function drush_cmi_tools_drush_command() {
       ],
       'core' => ['8+'],
       'examples' => [
-        'drush config-import-plus --skip-modules=devel --delete-list=./config-delete.yml --initials=/some/install/folder --source=/some/export/folder' => 'Import configuration; do not enable or disable the devel module, regardless of whether or not it appears in the imported list of enabled modules.',
+        'drush config-import-plus --skip-modules=devel --delete-list=./config-delete.yml --install=/some/install/folder --source=/some/export/folder' => 'Import configuration; do not enable or disable the devel module, regardless of whether or not it appears in the imported list of enabled modules.',
       ],
       'aliases' => ['cimy'],
     ];
