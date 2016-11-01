@@ -3,7 +3,7 @@ Provides advanced CMI import and export functionality for CMI workflows.
 
 ## Use case
 Say you're working on a local development environment for a project where the client is adding and editing configuration.
-For example, the project might be using [contact-forms](https://drupal.org/project/contact_storage) or [Yaml forms](https://drupal.org/project/yaml_form) for user interaction. Each of these and their associated fields, form and view displays are a config object. As the client is editing these, you don't want that configuration tracked in your source control.
+For example, the project might be using [Contact Storage](https://drupal.org/project/contact_storage) or [YAML Form](https://drupal.org/project/yamlform) for user interaction. Each of these and their associated fields, form and view displays are a config object. As the client is editing these, you don't want that configuration tracked in your source control.
 
 So you start working on a new feature, the first thing you do is sync down a QA or production database and then you run your config import so that your local environment is in a clean state. 
 
