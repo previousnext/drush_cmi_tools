@@ -27,6 +27,9 @@ function drush_cmi_tools_drush_command() {
       'ignore-list' => [
         'description' => 'Path to YAML file containing config to ignore from exports',
       ],
+      'partial-list' => [
+        'description' => 'Path to YAML file containing config to exclusively export',
+      ],
     ],
     'examples' => [
       'drush config-export-plus --destination=/some/folder --ignore-list=./config-ignore.yml' => 'Export configuration; Save files in a backup directory named config-export.',
@@ -75,7 +78,8 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
   } else {
     return drush_log(dt('You must provide a --destination option'), LogLevel::ERROR);
   }
-  $patterns = [];
+  $patterns = ['ignore' => [], 'partial' => []];
+  // Parse ignore list.
   if ($ignore_list = drush_get_option('ignore-list')) {
     if (!is_file($ignore_list)) {
       return drush_log(dt('The file specified in --ignore-list option does not exist.'), LogLevel::ERROR);
@@ -100,14 +104,56 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
         if (substr($ignore, -4) === '.yml') {
           $ignore = substr($ignore, 0, -4);
         }
-        $patterns[] =  '/' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
+        $patterns['ignore'][] = '/' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
+      }
+    }
+  }
+  // Parse partial list.
+  if ($partial_list = drush_get_option('partial-list')) {
+    if (!is_file($partial_list)) {
+      return drush_log(dt('The file specified in --partial-list option does not exist.'), LogLevel::ERROR);
+    }
+    if ($string = file_get_contents($partial_list)) {
+      $partial_list_error = FALSE;
+      $parsed = FALSE;
+      try {
+        $parsed = Yaml::decode($string);
+      }
+      catch (InvalidDataTypeException $e) {
+        $partial_list_error = TRUE;
+      }
+      if (!isset($parsed['config']) || !is_array($parsed['config'])) {
+        $partial_list_error = TRUE;
+      }
+      if ($partial_list_error) {
+        return drush_log(dt('The file specified in --partial-list option is in the wrong format. It must be valid YAML with a top-level config key.'), LogLevel::ERROR);
+      }
+      foreach ($parsed['config'] as $config) {
+        // Allow for accidental .yml extension.
+        if (substr($config, -4) === '.yml') {
+          $config = substr($config, 0, -4);
+        }
+        $patterns['partial'][] = '/' . str_replace('\*', '(.*)', preg_quote($config)) . '\.yml/';
       }
     }
   }
 
   $result = _drush_config_export($destination, $destination_dir, FALSE);
   $file_service =  \Drupal::service('file_system');
-  foreach ($patterns as $pattern) {
+
+  if (!empty($patterns['partial'])) {
+    $matches = array();
+    foreach ($patterns['partial'] as $pattern) {
+      $matches += file_scan_directory($destination_dir, $pattern);
+    }
+    $all_files = file_scan_directory($destination_dir, '/.*\.yml/');
+    foreach (array_diff_key($all_files, $matches) as $file_url => $file) {
+      $file_service->unlink($file_url);
+      drush_log("Removed $file_url according to partial list.", LogLevel::OK);
+    }
+  }
+
+  foreach ($patterns['ignore'] as $pattern) {
     foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
       $file_service->unlink($file_url);
       drush_log("Removed $file_url according to ignore list.", LogLevel::OK);
