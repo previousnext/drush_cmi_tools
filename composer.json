@@ -1,0 +1,15 @@
+{
+  "name": "drupal/drush-cmi-tools",
+  "type": "drupal-drush",
+  "description": "Export configuration to a directory and apply an ignore list.",
+  "keywords": [
+    "Drupal"
+  ],
+  "license": "GPL-2.0+",
+  "homepage": "https://github.com/previousnext/drush_cmi_tools",
+  "support": {
+    "issues": "https://github.com/previousnext/drush_cmi_tools/issues",
+    "source": "https://github.com/previousnext/drush_cmi_tools"
+  },
+  "require": {}
+}
