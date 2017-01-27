@@ -100,7 +100,7 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
         if (substr($ignore, -4) === '.yml') {
           $ignore = substr($ignore, 0, -4);
         }
-        $patterns[] =  '/' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
+        $patterns[] =  '/^' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
       }
     }
   }
