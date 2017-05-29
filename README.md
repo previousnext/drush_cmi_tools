@@ -143,6 +143,22 @@ wget https://raw.githubusercontent.com/previousnext/drush_cmi_tools/8.x-1.x/drus
 drush cc drush
 ```
 
+### As Composer dependency
+
+First, update composer.json manually. Then call `require` command.
+```
+"repositories": [
+    {
+        "url": "https://github.com/previousnext/drush_cmi_tools.git",
+        "type": "git"
+    }
+],
+"require": {
+    "drupal/drush-cmi-tools": "dev-8.x-1.x"
+},
+```
+`$ composer require drupal/drush-cmi-tools:dev-8.x-1.x`
+
 # References
 
 * <a name="ref1"></a>1. According to a random survey of this one guy I met on the train.
