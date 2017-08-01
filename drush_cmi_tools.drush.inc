@@ -74,6 +74,7 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
     return drush_log(dt('You must provide a --destination option'), LogLevel::ERROR);
   }
   $patterns = [];
+  $collections = [];
   if ($ignore_list = drush_get_option('ignore-list')) {
     if (!is_file($ignore_list)) {
       return drush_log(dt('The file specified in --ignore-list option does not exist.'), LogLevel::ERROR);
@@ -87,24 +88,40 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
       catch (InvalidDataTypeException $e) {
         $ignore_list_error = TRUE;
       }
-      if (!isset($parsed['ignore']) || !is_array($parsed['ignore'])) {
+      if (!isset($parsed['ignore']) || !is_array($parsed['ignore']) || !isset($parsed['ignore_collection']) || !is_array($parsed['ignore_collection'])) {
         $ignore_list_error = TRUE;
       }
       if ($ignore_list_error) {
-        return drush_log(dt('The file specified in --ignore-list option is in the wrong format. It must be valid YAML with a top-level ignore key.'), LogLevel::ERROR);
+        return drush_log(dt('The file specified in --ignore-list option is in the wrong format. It must be valid YAML with a top-level ignore and ignore_collection key.'), LogLevel::ERROR);
       }
       foreach ($parsed['ignore'] as $ignore) {
         // Allow for accidental .yml extension.
         if (substr($ignore, -4) === '.yml') {
           $ignore = substr($ignore, 0, -4);
         }
-        $patterns[] =  '/^' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
+        $patterns[] = '/^' . str_replace('\*', '(.*)', preg_quote($ignore)) . '\.yml/';
+      }
+      foreach ($parsed['ignore_collection'] as $ignore) {
+        $collections[] = str_replace('.', '/', $ignore);
       }
     }
   }
 
   $result = _drush_config_export($destination, $destination_dir, FALSE);
-  $file_service =  \Drupal::service('file_system');
+  foreach ($collections as $collection_dir) {
+    $collection_path = $destination_dir . '/' . $collection_dir;
+    if (is_dir($collection_path)) {
+      file_unmanaged_delete_recursive($collection_path);
+      drush_log("Removed $collection_path collection according to ignore list.", LogLevel::OK);
+    }
+    $collection_directories = explode('/', $collection_dir);
+    $collection_root_dir = $destination_dir . '/' . reset($collection_directories);
+    if (is_dir($collection_root_dir) && (count(scandir($collection_root_dir)) == 2)) {
+      file_unmanaged_delete_recursive($collection_root_dir);
+    }
+  }
+
+  $file_service = \Drupal::service('file_system');
   foreach ($patterns as $pattern) {
     foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
       $file_service->unlink($file_url);
