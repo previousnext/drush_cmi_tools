@@ -16,7 +16,7 @@ Its like `drush cex` but with 74% more shiny<sup>[1](#ref1)</sup>.
 
 So the normal `drush cex` command comes with a `--skip-modules` option that prevents configuration from say devel module from being exported. But let's go back to our original use case.
 
-We want to export all configuration, but we want to exclude certain patterns.
+We want to export all configuration, but we want to exclude certain patterns or collections.
 
 This is where the `--ignore-list` option of `drush cexy` comes in.
 
@@ -33,9 +33,11 @@ ignore:
   - core.entity_view_display.contact_form*
   - system.site
   - workbench_email.workbench_email_template.*
+ignore_collection:
+  - language.sw
 ```
 
-You'll note there are some wildcards there. We're ignoring all contact message fields and forms as well as any form or view display configuration. Additionally we're ignoring [Workbench Email](https://drupal.org/project/workbench_email) templates and the system site settings.
+You'll note there are some wildcards there. We're ignoring all contact message fields and forms as well as any form or view display configuration. Additionally we're ignoring [Workbench Email](https://drupal.org/project/workbench_email) templates and the system site settings in addition to excluding the Swedish language collection.
 
 So now we run `drush cexy` like so
 
