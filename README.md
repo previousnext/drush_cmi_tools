@@ -34,7 +34,7 @@ ignore:
   - system.site
   - workbench_email.workbench_email_template.*
 ignore_collection:
-	- language.sw
+  - language.sw
 ```
 
 You'll note there are some wildcards there. We're ignoring all contact message fields and forms as well as any form or view display configuration. Additionally we're ignoring [Workbench Email](https://drupal.org/project/workbench_email) templates and the system site settings in addition to excluding the Swedish language collection.
