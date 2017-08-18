@@ -11,5 +11,7 @@
     "issues": "https://github.com/previousnext/drush_cmi_tools/issues",
     "source": "https://github.com/previousnext/drush_cmi_tools"
   },
-  "require": {}
+  "require": {
+    "drush/drush": "~8.1"
+  }
 }
