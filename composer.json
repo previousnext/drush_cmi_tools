@@ -11,5 +11,9 @@
     "issues": "https://github.com/previousnext/drush_cmi_tools/issues",
     "source": "https://github.com/previousnext/drush_cmi_tools"
   },
-  "require": {}
+  "require": {
+      "drupal/core": "^8.4"
+      "drush/drush": "^9.0.0-beta6"
+
+  }
 }

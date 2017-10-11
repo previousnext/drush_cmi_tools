@@ -1,5 +1,13 @@
 services:
   drush_cmi_tools.commands:
     class: \Drupal\drush_cmi_tools\Commands\DrushCmiToolsCommands
+    arguments:
+      - '@file_system'
+      - '@serialization.yaml'
+      - '@config.commands'
+      - '@config.export.commands'
+      - '@config.import.commands'
+      - '@config.storage'
+      - '@config.manager'
     tags:
       - { name: drush.command }

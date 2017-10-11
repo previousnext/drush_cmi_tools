@@ -3,17 +3,93 @@
 namespace Drupal\drush_cmi_tools\Commands;
 
 use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
-use Drupal\Component\Serialization\Yaml;
+use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\config\StorageReplaceDataWrapper;
+use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
-use Drush\Drupal\Commands\config\ConfigCommands;
+use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drush\Commands\DrushCommands;
+use Drush\Drupal\Commands\config\ConfigCommands;
+use Drush\Drupal\Commands\config\ConfigExportCommands;
+use Drush\Drupal\Commands\config\ConfigImportCommands;
+
 
 /**
  * Drush CMI Tools commands.
  */
 class DrushCmiToolsCommands extends DrushCommands {
+
+  /**
+   * The filesystem.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
+   * The serializer.
+   *
+   * @var \Drupal\Component\Serialization\SerializationInterface
+   */
+  protected $serializer;
+
+  /**
+   * The config commands.
+   *
+   * @var ConfigCommands
+   */
+  protected $configCommands;
+
+  /**
+   * The standard drush config export commands.
+   *
+   * @var \Drush\Drupal\Commands\config\ConfigExportCommands
+   */
+  protected $configExportCommands;
+
+  /**
+   * The standard drush config import commands.
+   *
+   * @var \Drush\Drupal\Commands\config\ConfigImportCommands
+   */
+  protected $configImportCommands;
+
+  /**
+   * The config storage.
+   *
+   * @var \Drupal\Core\Config\StorageInterface
+   */
+  protected $configStorage;
+
+  /**
+   * The config manager.
+   *
+   * @var \Drupal\Core\Config\ConfigManagerInterface
+   */
+  protected $configManager;
+
+  /**
+   * CmiToolsCli constructor.
+   *
+   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
+   * @param \Drupal\Component\Serialization\SerializationInterface $serializer
+   * @param \Drush\Drupal\Commands\config\ConfigCommands $configCommands
+   * @param \Drush\Drupal\Commands\config\ConfigExportCommands $configExportCommands
+   * @param \Drush\Drupal\Commands\config\ConfigImportCommands $configImportCommands
+   * @param \Drupal\Core\Config\StorageInterface $configStorage
+   * @param \Drupal\Core\Config\ConfigManagerInterface $configManager
+   */
+  public function __construct(FileSystemInterface $fileSystem, SerializationInterface $serializer, ConfigCommands $configCommands, ConfigExportCommands $configExportCommands, ConfigImportCommands $configImportCommands, StorageInterface $configStorage, ConfigManagerInterface $configManager) {
+    $this->fileSystem = $fileSystem;
+    $this->serializer = $serializer;
+    $this->configCommands = $configCommands;
+    $this->configExportCommands = $configExportCommands;
+    $this->configImportCommands = $configImportCommands;
+    $this->configStorage = $configStorage;
+    $this->configManager = $configManager;
+  }
 
   /**
    * Export configuration to a directory and apply an ignore list.
@@ -27,42 +103,40 @@ class DrushCmiToolsCommands extends DrushCommands {
    *   --ignore-list=./config-ignore.yml Export configuration; Save files in a
    *   backup directory named config-export.
    * @aliases cexy
-   *
    * @param array $options
    *   The options.
    *
-   * @return
+   * @return mixed
    */
   public function exportPlus($options = [
     'destination' => NULL,
     'ignore-list' => NULL,
   ]) {
-
-    $this->logger()->debug('Starting Exporting.');
+    $this->logger->debug('Starting Exporting.');
     // Do the actual config export operation
     // Determine which target directory to use.
-    if (($target = $options['destination']) && $target !== TRUE) {
+    if ($target = $options['destination']) {
       $destination_dir = $target;
       // It is important to be able to specify a destination directory that
       // does not exist yet, for exporting on remote systems
-      drush_mkdir($destination_dir);
+      $this->fileSystem->mkdir($destination_dir, NULL, TRUE);
     }
     else {
-      $this->logger()->error('You must provide a --destination option');
+      $this->logger->error('You must provide a --destination option');
       return NULL;
     }
     $patterns = [];
-    if ($ignore_list = $options['ignore-list']) {
-      if (!is_file($ignore_list)) {
-        $this->logger()
+    if (isset($ignoreList)) {
+      if (!is_file($ignoreList)) {
+        $this->logger
           ->error('The file specified in --ignore-list option does not exist.');
         return NULL;
       }
-      if ($string = file_get_contents($ignore_list)) {
+      if ($string = file_get_contents($ignoreList)) {
         $ignore_list_error = FALSE;
         $parsed = FALSE;
         try {
-          $parsed = Yaml::decode($string);
+          $parsed = $this->serializer->decode($string);
         } catch (InvalidDataTypeException $e) {
           $ignore_list_error = TRUE;
         }
@@ -70,7 +144,7 @@ class DrushCmiToolsCommands extends DrushCommands {
           $ignore_list_error = TRUE;
         }
         if ($ignore_list_error) {
-          $this->logger()
+          $this->logger
             ->error('The file specified in --ignore-list option is in the wrong format. It must be valid YAML with a top-level ignore key.');
           return NULL;
         }
@@ -84,17 +158,13 @@ class DrushCmiToolsCommands extends DrushCommands {
       }
     }
 
-    $result = \Drupal::service('config.export.commands')
-      ->doExport($options['destination'], $destination_dir, FALSE);
-    $file_service = \Drupal::service('file_system');
+    $result = $this->configExportCommands->doExport(NULL, $destination_dir);
     foreach ($patterns as $pattern) {
       foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
-        $file_service->unlink($file_url);
-        $this->logger()->info("Removed $file_url according to ignore list.");
+        $this->fileSystem->unlink($file_url);
+        $this->logger->info("Removed $file_url according to ignore list.");
       }
     }
-
-    return $result;
   }
 
   /**
@@ -114,11 +184,10 @@ class DrushCmiToolsCommands extends DrushCommands {
    *   configuration; do not enable or disable the devel module, regardless of
    *   whether or not it appears in the imported list of enabled modules.
    * @aliases cimy
-   *
    * @param array $options
    *   The options.
    *
-   * @return
+   * @return mixed
    */
   public function importPlus($options = [
     'preview' => 'list',
@@ -126,27 +195,24 @@ class DrushCmiToolsCommands extends DrushCommands {
     'delete-list' => NULL,
     'install' => NULL,
   ]) {
-
     $this->logger->debug('Starting import');
     // Determine source directory.
-    if ($target = drush_get_option('source')) {
+    if ($target = $options['source']) {
       $source_dir = $target;
     }
     else {
-      $this->logger()->error('You must provide a --source option');
+      $this->logger->error('You must provide a --source option');
       return NULL;
     }
-    /** @var \Drupal\Core\Config\StorageInterface $active_storage */
-    $active_storage = \Drupal::service('config.storage');
-    $source_storage = new StorageReplaceDataWrapper($active_storage);
+    $source_storage = new StorageReplaceDataWrapper($this->configStorage);
     $file_storage = new FileStorage($source_dir);
     foreach ($file_storage->listAll() as $name) {
       $data = $file_storage->read($name);
       $source_storage->replaceData($name, $data);
     }
-    if ($delete_list = drush_get_option('delete-list')) {
+    if ($delete_list = $options['delete-list']) {
       if (!is_file($delete_list)) {
-        $this->logger()
+        $this->logger
           ->error('The file specified in --delete-list option does not exist.');
         return NULL;
       }
@@ -154,7 +220,7 @@ class DrushCmiToolsCommands extends DrushCommands {
         $delete_list_error = FALSE;
         $parsed = FALSE;
         try {
-          $parsed = Yaml::decode($string);
+          $parsed = $this->serializer->decode($string);
         } catch (InvalidDataTypeException $e) {
           $delete_list_error = TRUE;
         }
@@ -162,7 +228,7 @@ class DrushCmiToolsCommands extends DrushCommands {
           $delete_list_error = TRUE;
         }
         if ($delete_list_error) {
-          $this->logger()
+          $this->logger
             ->error('The file specified in --delete-list option is in the wrong format. It must be valid YAML with a top-level delete key.');
           return NULL;
         }
@@ -173,10 +239,10 @@ class DrushCmiToolsCommands extends DrushCommands {
           }
           if ($source_storage->exists($delete)) {
             $source_storage->delete($delete);
-            $this->logger()->info("Deleted $delete as per delete list.");
+            $this->logger->info("Deleted $delete as per delete list.");
           }
           else {
-            $this->logger()->info("Ignored deleting $delete, does not exist.");
+            $this->logger->info("Ignored deleting $delete, does not exist.");
           }
         }
       }
@@ -187,18 +253,15 @@ class DrushCmiToolsCommands extends DrushCommands {
         if (!$source_storage->exists($name)) {
           $data = $file_storage->read($name);
           $source_storage->replaceData($name, $data);
-          $this->logger()->info("Installed $name for first time.");
+          $this->logger->info("Installed $name for first time.");
         }
       }
     }
 
-    /** @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
-    $config_manager = \Drupal::service('config.manager');
-    $storage_comparer = new StorageComparer($source_storage, $active_storage, $config_manager);
-
+    $storage_comparer = new StorageComparer($source_storage, $this->configStorage, $this->configManager);
 
     if (!$storage_comparer->createChangelist()->hasChanges()) {
-      $this->logger()->info('There are no changes to import.');
+      $this->logger->info('There are no changes to import.');
       return NULL;
     }
 
@@ -207,7 +270,7 @@ class DrushCmiToolsCommands extends DrushCommands {
       foreach ($storage_comparer->getAllCollectionNames() as $collection) {
         $change_list[$collection] = $storage_comparer->getChangelist(NULL, $collection);
       }
-      ConfigCommands::configChangesTablePrint($change_list);
+      $this->configCommands->configChangesTablePrint($change_list);
     }
     else {
       // Copy active storage to the temporary directory.
@@ -215,7 +278,7 @@ class DrushCmiToolsCommands extends DrushCommands {
       $temp_storage = new FileStorage($temp_dir);
       $source_dir_storage = new FileStorage($source_dir);
       foreach ($source_dir_storage->listAll() as $name) {
-        if ($data = $active_storage->read($name)) {
+        if ($data = $this->configStorage->read($name)) {
           $temp_storage->write($name, $data);
         }
       }
@@ -225,7 +288,7 @@ class DrushCmiToolsCommands extends DrushCommands {
     }
 
     if ($this->io()->confirm('Import the listed configuration changes?')) {
-      \Drupal::service('config.import.commands')->doImport($storage_comparer);
+      $this->configImportCommands->doImport($storage_comparer);
     }
   }
 
