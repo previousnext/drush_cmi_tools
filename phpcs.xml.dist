@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="drupal_core">
+  <description>Default PHP CodeSniffer configuration for Drupal core.</description>
+  <file>.</file>
+  <arg name="extensions" value="inc,install,module,php,profile,test,theme"/>
+
+  <!--Exclude third party code.-->
+  <exclude-pattern>./vendor/*</exclude-pattern>
+  <!--Exclude non-PHP files.-->
+  <exclude-pattern>*.md</exclude-pattern>
+
+  <!-- Drupal sniffs -->
+  <rule ref="./vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"/>
+
+</ruleset>

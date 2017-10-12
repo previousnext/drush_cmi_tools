@@ -1,19 +1,29 @@
 {
-  "name": "drupal/drush-cmi-tools",
-  "type": "drupal-drush",
-  "description": "Export configuration to a directory and apply an ignore list.",
-  "keywords": [
-    "Drupal"
-  ],
-  "license": "GPL-2.0+",
-  "homepage": "https://github.com/previousnext/drush_cmi_tools",
-  "support": {
-    "issues": "https://github.com/previousnext/drush_cmi_tools/issues",
-    "source": "https://github.com/previousnext/drush_cmi_tools"
-  },
-  "require": {
-      "drupal/core": "^8.4",
-      "drush/drush": "^9.0.0-beta6"
-
-  }
+    "name": "drupal/drush-cmi-tools",
+    "type": "drupal-module",
+    "description": "Export configuration to a directory and apply an ignore list.",
+    "keywords": [
+        "Drupal"
+    ],
+    "license": "GPL-2.0+",
+    "homepage": "https://github.com/previousnext/drush_cmi_tools",
+    "support": {
+        "issues": "https://github.com/previousnext/drush_cmi_tools/issues",
+        "source": "https://github.com/previousnext/drush_cmi_tools"
+    },
+    "repositories": {
+        "packages.drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
+    "require": {
+        "drupal/core": "^8.4",
+        "drush/drush": "^9.0.0-beta6"
+    },
+    "require-dev": {
+        "drupal/coder": "~2.2",
+        "phpunit/phpunit": "~4.8",
+        "squizlabs/php_codesniffer": "~2.9"
+    }
 }
