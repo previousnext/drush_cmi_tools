@@ -15,7 +15,6 @@ use Drush\Drupal\Commands\config\ConfigCommands;
 use Drush\Drupal\Commands\config\ConfigExportCommands;
 use Drush\Drupal\Commands\config\ConfigImportCommands;
 
-
 /**
  * Drush CMI Tools commands.
  */
@@ -284,7 +283,7 @@ class DrushCmiToolsCommands extends DrushCommands {
       }
       drush_shell_exec('diff -x %s -u %s %s', '*.git', $temp_dir, $source_dir);
       $output = drush_shell_exec_output();
-      drush_print(implode("\n", $output));
+      $this->io()->writeln(implode("\n", $output));
     }
 
     if ($this->io()->confirm('Import the listed configuration changes?')) {

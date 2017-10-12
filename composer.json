@@ -12,7 +12,7 @@
     "source": "https://github.com/previousnext/drush_cmi_tools"
   },
   "require": {
-      "drupal/core": "^8.4"
+      "drupal/core": "^8.4",
       "drush/drush": "^9.0.0-beta6"
 
   }
