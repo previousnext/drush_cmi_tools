@@ -25,5 +25,18 @@
         "drupal/coder": "~2.2",
         "phpunit/phpunit": "~4.8",
         "squizlabs/php_codesniffer": "~2.9"
+    },
+    "config": {
+        "bin-dir": "bin/"
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\drush_cmi_tools\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Drupal\\drush_cmi_tools\\Tests\\": "tests/"
+        }
     }
 }
