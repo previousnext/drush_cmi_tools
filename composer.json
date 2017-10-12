@@ -1,5 +1,5 @@
 {
-    "name": "drupal/drush-cmi-tools",
+    "name": "drupal/drush_cmi_tools",
     "type": "drupal-module",
     "description": "Export configuration to a directory and apply an ignore list.",
     "keywords": [
