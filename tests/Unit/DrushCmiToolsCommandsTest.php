@@ -13,7 +13,7 @@ class DrushCmiToolsCommandsTest extends \PHPUnit_Framework_TestCase {
    * Tests the constructor.
    */
   public function testCreate() {
-    $this->assertTrue(TRUE);
+    $this->markTestIncomplete();
   }
 
 }
