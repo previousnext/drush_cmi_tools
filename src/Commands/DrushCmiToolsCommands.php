@@ -127,14 +127,16 @@ class DrushCmiToolsCommands extends DrushCommands {
       $destination_dir = $target;
       // It is important to be able to specify a destination directory that
       // does not exist yet, for exporting on remote systems.
-      $this->fileSystem->mkdir($destination_dir, NULL, TRUE);
+      if (!file_exists($destination_dir)) {
+        $this->fileSystem->mkdir($destination_dir, NULL, TRUE);
+      }
     }
     else {
       $this->logger()->error('You must provide a --destination option');
       return NULL;
     }
     $patterns = [];
-    if (isset($ignoreList)) {
+    if ($ignoreList = $options['ignore-list']) {
       if (!is_file($ignoreList)) {
         $this->logger()
           ->error('The file specified in --ignore-list option does not exist.');
