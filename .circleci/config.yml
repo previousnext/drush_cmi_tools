@@ -7,9 +7,19 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - drush-cmi-tools-v1-{{ arch }}
+            - drush-cmi-tools
+
       - run:
           name: Install Dependencies
           command: composer install --prefer-dist
+
+      - save_cache:
+          key: drush-cmi-tools-v1-{{ arch }}
+          paths:
+            - ./vendor
 
       - run:
           name: Validate Code
