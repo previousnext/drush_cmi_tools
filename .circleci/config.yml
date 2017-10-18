@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.1-cli-node
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - drush-cmi-tools-v1-{{ arch }}
+            - drush-cmi-tools
+
+      - run:
+          name: Install Dependencies
+          command: composer install --prefer-dist
+
+      - save_cache:
+          key: drush-cmi-tools-v1-{{ arch }}
+          paths:
+            - ./vendor
+
+      - run:
+          name: Validate Code
+          command: ./bin/phpcs
+
+      - run:
+          name: Test
+          command: ./bin/phpunit
