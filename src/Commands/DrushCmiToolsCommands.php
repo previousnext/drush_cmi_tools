@@ -285,7 +285,8 @@ class DrushCmiToolsCommands extends DrushCommands {
       foreach ($storage_comparer->getAllCollectionNames() as $collection) {
         $change_list[$collection] = $storage_comparer->getChangelist(NULL, $collection);
       }
-      $this->configCommands->configChangesTablePrint($change_list);
+      $table = $this->configCommands->configChangesTable($change_list, $this->output());
+      $table->render();
     }
     else {
       // Copy active storage to the temporary directory.
