@@ -38,5 +38,12 @@
         "psr-4": {
             "Drupal\\drush_cmi_tools\\Tests\\": "tests/"
         }
+    },
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9"
+            }
+        }
     }
 }
