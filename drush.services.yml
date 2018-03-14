@@ -1,0 +1,5 @@
+services:
+  drush_cmi_tools.commands:
+    class: \Drupal\drush_cmi_tools\Commands\DrushCmiToolsCommands
+    tags:
+      - { name: drush.command }

@@ -1,0 +1,5 @@
+type: module
+name: 'Drush CMI Tools'
+description: 'Provides custom export/import commands.'
+core: 8.x
+package: 'Drush'
