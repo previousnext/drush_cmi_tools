@@ -44,7 +44,7 @@ class DrushCmiToolsCommands extends DrushCommands {
       return;
     }
     $patterns = [];
-    if ($ignore_list = drush_get_option('ignore-list')) {
+    if ($ignore_list = $options['ignore-list']) {
       if (!is_file($ignore_list)) {
         $this->logger()->error(dt('The file specified in --ignore-list option does not exist.'));
         return;
@@ -128,7 +128,7 @@ class DrushCmiToolsCommands extends DrushCommands {
       $data = $file_storage->read($name);
       $source_storage->replaceData($name, $data);
     }
-    if ($delete_list = drush_get_option('delete-list')) {
+    if ($delete_list = $options['delete-list']) {
       if (!is_file($delete_list)) {
         $this->logger()->error(dt('The file specified in --delete-list option does not exist.'));
         return;
@@ -164,7 +164,7 @@ class DrushCmiToolsCommands extends DrushCommands {
         }
       }
     }
-    if ($install = drush_get_option('install')) {
+    if ($install = $options['install']) {
       $file_storage = new FileStorage($install);
       foreach ($file_storage->listAll() as $name) {
         if (!$source_storage->exists($name)) {
