@@ -84,7 +84,7 @@ class DrushCmiToolsCommands extends DrushCommands {
     foreach ($patterns as $pattern) {
       foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
         $file_service->unlink($file_url);
-        $this->logger()->info("Removed $file_url according to ignore list.");
+        $this->logger()->notice("Removed $file_url according to ignore list.");
       }
     }
 
@@ -156,10 +156,10 @@ class DrushCmiToolsCommands extends DrushCommands {
           }
           if ($source_storage->exists($delete)) {
             $source_storage->delete($delete);
-            $this->logger()->info("Deleted $delete as per delete list.");
+            $this->logger()->notice("Deleted $delete as per delete list.");
           }
           else {
-            $this->logger()->info("Ignored deleting $delete, does not exist.");
+            $this->logger()->notice("Ignored deleting $delete, does not exist.");
           }
         }
       }
@@ -170,7 +170,7 @@ class DrushCmiToolsCommands extends DrushCommands {
         if (!$source_storage->exists($name)) {
           $data = $file_storage->read($name);
           $source_storage->replaceData($name, $data);
-          $this->logger()->info("Installed $name for first time.");
+          $this->logger()->notice("Installed $name for first time.");
         }
       }
     }
@@ -181,7 +181,7 @@ class DrushCmiToolsCommands extends DrushCommands {
 
 
     if (!$storage_comparer->createChangelist()->hasChanges()) {
-      $this->logger()->info(dt('There are no changes to import.'));
+      $this->logger()->notice(dt('There are no changes to import.'));
       return;
     }
 
@@ -196,7 +196,7 @@ class DrushCmiToolsCommands extends DrushCommands {
     }
     drush_shell_exec('diff -x %s -u %s %s', '*.git', $temp_dir, $source_dir);
     $output = drush_shell_exec_output();
-    $this->logger()->info(implode("\n", $output));
+    $this->logger()->notice(implode("\n", $output));
 
     if ($this->io()->confirm(dt('Import the listed configuration changes?'))) {
       \Drupal::service('config.import.commands')->doImport($storage_comparer);
