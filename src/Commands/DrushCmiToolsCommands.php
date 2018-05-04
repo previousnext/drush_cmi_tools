@@ -110,7 +110,7 @@ class DrushCmiToolsCommands extends DrushCommands {
    * @command config:import-plus
    * @aliases cimy,config-import-plus
    */
-  public function importPlus(array $options = ['preview' => null, 'source' => null, 'delete-list' => null, 'install' => null]) {
+  public function importPlus(array $options = ['preview' => null, 'source' => null, 'delete-list' => null, 'install' => null, 'diff' => null]) {
     $this->logger()->debug(dt('Starting import'));
     // Determine source directory.
     if ($target = $options['source']) {
@@ -186,17 +186,19 @@ class DrushCmiToolsCommands extends DrushCommands {
     }
 
     // Copy active storage to the temporary directory.
-    $temp_dir = drush_tempdir();
-    $temp_storage = new FileStorage($temp_dir);
-    $source_dir_storage = new FileStorage($source_dir);
-    foreach ($source_dir_storage->listAll() as $name) {
-      if ($data = $active_storage->read($name)) {
-        $temp_storage->write($name, $data);
+    if ($options['diff']) {
+      $temp_dir = drush_tempdir();
+      $temp_storage = new FileStorage($temp_dir);
+      $source_dir_storage = new FileStorage($source_dir);
+      foreach ($source_dir_storage->listAll() as $name) {
+        if ($data = $active_storage->read($name)) {
+          $temp_storage->write($name, $data);
+        }
       }
+      drush_shell_exec('diff -x %s -u %s %s', '*.git', $temp_dir, $source_dir);
+      $output = drush_shell_exec_output();
+      $this->logger()->notice(implode("\n", $output));
     }
-    drush_shell_exec('diff -x %s -u %s %s', '*.git', $temp_dir, $source_dir);
-    $output = drush_shell_exec_output();
-    $this->logger()->notice(implode("\n", $output));
 
     if ($this->io()->confirm(dt('Import the listed configuration changes?'))) {
       \Drupal::service('config.import.commands')->doImport($storage_comparer);
