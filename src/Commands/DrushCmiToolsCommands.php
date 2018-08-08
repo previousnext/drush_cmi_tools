@@ -8,7 +8,6 @@ use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Serialization\Yaml;
 use Drush\Commands\DrushCommands;
-use Drush\Drupal\Commands\config\ConfigCommands;
 
 /**
  * A Drush commandfile.
@@ -36,6 +35,14 @@ class DrushCmiToolsCommands extends DrushCommands {
     // Determine which target directory to use.
     if (($target = $options['destination']) && $target !== TRUE) {
       $destination_dir = $target;
+
+      // Support writing to a destination from the $config_directories specified
+      // in settings.php
+      global $config_directories;
+      if (!empty($config_directories[$destination_dir])) {
+        $destination_dir = $config_directories[$destination_dir];
+      }
+
       // It is important to be able to specify a destination directory that
       // does not exist yet, for exporting on remote systems
       drush_mkdir($destination_dir);
@@ -115,6 +122,13 @@ class DrushCmiToolsCommands extends DrushCommands {
     // Determine source directory.
     if ($target = $options['source']) {
       $source_dir = $target;
+
+      // Support reading the source from the $config_directories specified in
+      // settings.php
+      global $config_directories;
+      if (!empty($config_directories[$source_dir])) {
+        $source_dir = $config_directories[$source_dir];
+      }
     }
     else {
       $this->logger()->error(dt('You must provide a --source option'));
