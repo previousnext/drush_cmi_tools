@@ -9,7 +9,7 @@ use Drupal\Component\Serialization\Yaml;
 use Drupal\config\StorageReplaceDataWrapper;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
-use Drush\Config\StorageWrapper;
+use Drush\Drupal\Commands\config\ConfigCommands;
 use Drush\Log\LogLevel;
 
 /**
@@ -103,7 +103,7 @@ function drush_drush_cmi_tools_config_export_plus($destination = NULL) {
     }
   }
 
-  $result = _drush_config_export($destination, $destination_dir, FALSE);
+  $result = \Drupal::service('config.export.commands')->doExport($destination, $destination_dir, FALSE);
   $file_service =  \Drupal::service('file_system');
   foreach ($patterns as $pattern) {
     foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
@@ -194,7 +194,7 @@ function drush_drush_cmi_tools_config_import_plus($destination = NULL) {
     foreach ($storage_comparer->getAllCollectionNames() as $collection) {
       $change_list[$collection] = $storage_comparer->getChangelist(NULL, $collection);
     }
-    _drush_print_config_changes_table($change_list);
+    ConfigCommands::configChangesTablePrint($change_list);
   }
   else {
     // Copy active storage to the temporary directory.
@@ -212,6 +212,6 @@ function drush_drush_cmi_tools_config_import_plus($destination = NULL) {
   }
 
   if (drush_confirm(dt('Import the listed configuration changes?'))) {
-    return drush_op('_drush_config_import', $storage_comparer);
+    \Drupal::service('config.import.commands')->doImport($storage_comparer);
   }
 }
