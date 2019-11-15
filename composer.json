@@ -19,11 +19,11 @@
     },
     "require": {
         "drupal/core": "^8.4",
-        "drush/drush": "^9.0.0-beta6"
+        "drush/drush": "^9.0|^10.0"
     },
     "require-dev": {
         "drupal/coder": "~2.2",
-        "phpunit/phpunit": "~4.8",
+        "phpunit/phpunit": "~6.4",
         "squizlabs/php_codesniffer": "~2.9"
     },
     "config": {
