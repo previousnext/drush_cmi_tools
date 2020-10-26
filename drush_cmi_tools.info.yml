@@ -1,5 +1,5 @@
 name: Drush CMI Tools
 type: module
 description: Provides advanced CMI import and export functionality for CMI workflows.
-core: 8.x
+core_version_requirement: ^8.8 || ^9
 package: Config
