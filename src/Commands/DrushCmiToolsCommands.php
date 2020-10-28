@@ -171,7 +171,7 @@ class DrushCmiToolsCommands extends DrushCommands {
 
     $result = $this->configExportCommands->doExport(NULL, $destination_dir);
     foreach ($patterns as $pattern) {
-      foreach (file_scan_directory($destination_dir, $pattern) as $file_url => $file) {
+      foreach ($this->fileSystem->scanDirectory($destination_dir, $pattern) as $file_url => $file) {
         $this->fileSystem->unlink($file_url);
         $this->logger()->notice("Removed $file_url according to ignore list.");
       }
