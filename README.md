@@ -1,6 +1,10 @@
 # Drush CMI tools
 Provides advanced CMI import and export functionality for CMI workflows.
 
+## ☠️ Deprecated ☠️ ##
+
+<strong>Please note that this module is deprecated and will not receive a Drupal 9 release. Please see [instructions for migrating to Config Ignore](https://www.previousnext.com.au/blog/migrate-from-drush-cmi-tools-drupal-9) module instead.</strong>
+
 ## Use case
 Say you're working on a local development environment for a project where the client is adding and editing configuration.
 For example, the project might be using [Contact Storage](https://drupal.org/project/contact_storage) or [YAML Form](https://drupal.org/project/yamlform) for user interaction. Each of these and their associated fields, form and view displays are a config object. As the client is editing these, you don't want that configuration tracked in your source control.
