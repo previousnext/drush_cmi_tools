@@ -1,0 +1,16 @@
+version: 2
+
+updates:
+  - package-ecosystem: composer
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: wednesday
+      time: "07:30"
+      timezone: "Australia/Sydney"
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      composer-deps:
+        patterns: [ "*" ]
