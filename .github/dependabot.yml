@@ -11,6 +11,11 @@ updates:
     commit-message:
       prefix: "build"
       include: "scope"
+    cooldown:
+      default-days: 2
     groups:
       composer-deps:
+        patterns: [ "*" ]
+      composer-security-deps:
+        applies-to: security-updates
         patterns: [ "*" ]
